@@ -10,7 +10,7 @@ jobs:
           java-version: '8'
           distribution: 'corretto'
       - run: mvn --batch-mode --update-snapshots verify
-      - run: mkdir vati-tools && cp target/appassembler/* vati-tools
+      - run: mkdir vati-tools && cp -r target/appassembler/* vati-tools
       - uses: actions/upload-artifact@v3
         with:
           name: vati-tools-executable
