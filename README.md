@@ -5,8 +5,11 @@ The use cases solved are based on the requirements from some of my friends at [N
 
 #### PS: The tool created as part of this project are only tested with minimal data and for specific scenarios. Please use at your own risk and the author does not take responsibility for any bugs/errors.
 
-# Major Frameworks Used
+## Major Frameworks Used
 1. [Picocli](https://picocli.info)
 2. [BioJava](https://biojava.org)
 
 Please check `pom.xml` file for complete list of dependencies of this project.
+
+## Usage Guide
+Please check the project [wiki](https://github.com/ajay-ghub/vati-tools/wiki)
