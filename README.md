@@ -1,5 +1,5 @@
 # vati-tools
-A set of command line tools related to Bio Informatics data processing. The idea is to atuomate some of the manual tasks so that they can be repeated for bulk processing.
+A set of command line tools related to Bio Informatics data processing. The idea is to automate some of the manual tasks so that they can be repeated for bulk processing.
 
 The use cases solved are based on the requirements from some of my friends at [NCCS Pune](https://nccs.res.in).
 
