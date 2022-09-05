@@ -25,7 +25,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "IG_CATEGORISATION", mixinStandardHelpOptions = true, version = "14-Aug-2022",
-        description = "IMGT Analysis of FASTA files")
+        description = "Categorise IMGT analysis of sequence files based on IG categories")
 @Log4j2
 public class IGCategorisationTool implements BaseTool {
 
