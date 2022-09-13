@@ -31,7 +31,7 @@ public class ClustalOmegaClient {
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         final Form form = new Form();
         form.param("sequence", String.join("", sequenceList));
-        form.param("email", "ajay3himachal@gmail.com");
+        form.param("email", "nobody@gmail.com");
         form.param("title", "test-run-title");
         form.param("outfmt", "clustal_num");
         form.param("stype", sequenceType);
