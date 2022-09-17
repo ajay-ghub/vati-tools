@@ -1,6 +1,8 @@
 package com.ajay.bio.client;
 
 import java.io.IOException;
+import java.util.Locale;
+import java.util.UUID;
 
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.IOUtils;
@@ -54,11 +56,12 @@ public class IMGTClient {
     }
 
     private static void addHeaders(final HttpPost httpPost) {
+        final String sessionId = UUID.randomUUID().toString().toUpperCase(Locale.ROOT).substring(0, 16);
         httpPost.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
         httpPost.setHeader("Content-type", "multipart/form-data; boundary=---------------------------322339693047834450438456424");
         httpPost.setHeader("Sec-Fetch-Dest", "document");
         httpPost.setHeader("Upgrade-Insecure-Requests", "1");
-        httpPost.setHeader("Cookie", "JSESSIONID=D70B18FE8D82922396B09916BA89C87D");
+        httpPost.setHeader("Cookie", "JSESSIONID=" + sessionId);
         httpPost.setHeader("Sec-Fetch-Mode", "navigate");
         httpPost.setHeader("Sec-Fetch-Site", "same-origin");
         httpPost.setHeader("Sec-Fetch-User", "?1");
