@@ -25,16 +25,9 @@ import picocli.CommandLine;
                 IGCategorisationTool.class,
                 ClustalAlignmentTool.class
         })
-public class VatiTool implements Callable<Integer> {
-    private PrintWriter out;
-
-    public void setReader(LineReader reader) {
-        out = reader.getTerminal().writer();
-    }
-
-    @Override
-    public Integer call() {
-        out.println(new CommandLine(this).getUsageMessage());
-        return 0;
+public class VatiTool {
+    public static void main(String[] args) {
+        int exitCode = new CommandLine(new VatiTool()).execute(args);
+        System.exit(exitCode);
     }
 }

@@ -155,7 +155,7 @@
           <copyConfigurationDirectory>true</copyConfigurationDirectory>
           <programs>
             <program>
-              <mainClass>com.ajay.bio.Main</mainClass>
+              <mainClass>com.ajay.bio.tool.VatiTool</mainClass>
               <id>vati</id>
             </program>
           </programs>
