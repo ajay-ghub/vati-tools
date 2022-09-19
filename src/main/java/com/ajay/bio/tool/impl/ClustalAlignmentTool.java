@@ -2,6 +2,7 @@ package com.ajay.bio.tool.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -168,6 +169,8 @@ public class ClustalAlignmentTool implements BaseTool {
 
         final Path pendingJobFilePath = getPendingJobFilePath(outputSubDir);
         FileUtils.writeLines(pendingJobFilePath.toFile(), pendingJobDetails);
+
+        createIGSubCategoryFiles(ighSubCategoryRowMap, outputSubDir);
     }
 
     private Set<String> submitClustalJobs(final Map<String, List<Row>> ighSubCategoryRowMap) throws ToolExecutionException, IOException {
@@ -276,4 +279,90 @@ public class ClustalAlignmentTool implements BaseTool {
         //return WorkbookFactory.create(igFile.toFile());
         return new HSSFWorkbook(new FileInputStream(igFile.toFile()));
     }
+
+    /**
+     * Creates IG Sub Category files.
+     */
+    private void createIGSubCategoryFiles(final Map<String, List<Row>> igSubcategory, final Path igSubCategoryDir) throws IOException {
+        for (Map.Entry<String, List<Row>> entry : igSubcategory.entrySet()) {
+            final String category = entry.getKey();
+            final List<Row> rows = entry.getValue();
+
+            log.info("Processing subcategory - {}", category);
+
+            final Path subCategoryFile = Paths.get(igSubCategoryDir.toAbsolutePath().toString(), category + ".xls");
+
+            try (final Workbook workbook = new HSSFWorkbook()) {
+                final Sheet sheet = workbook.createSheet("Sequences");
+                addIGHeaderRow(sheet);
+                final Row headerRow = sheet.getRow(0);
+                headerRow.createCell(headerRow.getLastCellNum(), CellType.STRING).setCellValue("Category");
+
+                int rowNum = 1;
+                for (Row r : rows) {
+                    final Row newRow = sheet.createRow(rowNum++);
+                    r.cellIterator().forEachRemaining(cell -> {
+                        if (cell.getCellType() == CellType.NUMERIC) {
+                            newRow.createCell(cell.getColumnIndex(),
+                                              cell.getCellType()).setCellValue(cell.getNumericCellValue());
+                        } else {
+                            newRow.createCell(cell.getColumnIndex(),
+                                              cell.getCellType()).setCellValue(getCellStringValue(cell));
+                        }
+                    });
+
+                    final Cell categoryCell = newRow.createCell(newRow.getLastCellNum(), CellType.STRING);
+                    final String vDomainFunctionality = getCellStringValue(newRow.getCell(2));
+                    final String junction = getCellStringValue(newRow.getCell(3));
+
+                    if ("productive".equalsIgnoreCase(vDomainFunctionality) && "in-frame".equalsIgnoreCase(junction)) {
+                        categoryCell.setCellValue("Yes");
+                    } else {
+                        categoryCell.setCellValue("No");
+                    }
+                }
+
+                final FileOutputStream outputStream = new FileOutputStream(subCategoryFile.toFile());
+                workbook.write(outputStream);
+            }
+        }
+    }
+
+    private void addIGHeaderRow(final Sheet sheet) {
+        final Row row = sheet.createRow(0);
+        row.createCell(0, CellType.STRING).setCellValue("Sequence Number");
+        row.createCell(1, CellType.STRING).setCellValue("Sequence ID");
+
+        row.createCell(2, CellType.STRING).setCellValue("V-DOMAIN Functionality");
+        row.createCell(3, CellType.STRING).setCellValue("JUNCTION frame");
+
+        row.createCell(4, CellType.STRING).setCellValue("V-GENE and allele");
+        row.createCell(5, CellType.STRING).setCellValue("J-GENE and allele");
+        row.createCell(6, CellType.STRING).setCellValue("D-GENE and allele");
+
+        row.createCell(7, CellType.STRING).setCellValue("AA - FR1-IMGT");
+        row.createCell(8, CellType.STRING).setCellValue("AA - CDR1-IMGT");
+        row.createCell(9, CellType.STRING).setCellValue("AA - FR2-IMGT");
+        row.createCell(10, CellType.STRING).setCellValue("AA - CDR2-IMGT");
+        row.createCell(11, CellType.STRING).setCellValue("AA - FR3-IMGT");
+        row.createCell(12, CellType.STRING).setCellValue("AA - CDR3-IMGT");
+        row.createCell(13, CellType.STRING).setCellValue("AA - FR4-IMGT");
+
+        row.createCell(14, CellType.STRING).setCellValue("AA - Merged");
+
+        row.createCell(15, CellType.STRING).setCellValue("NT - FR1-IMGT");
+        row.createCell(16, CellType.STRING).setCellValue("NT - CDR1-IMGT");
+        row.createCell(17, CellType.STRING).setCellValue("NT - FR2-IMGT");
+        row.createCell(18, CellType.STRING).setCellValue("NT - CDR2-IMGT");
+        row.createCell(19, CellType.STRING).setCellValue("NT - FR3-IMGT");
+        row.createCell(20, CellType.STRING).setCellValue("NT - CDR3-IMGT");
+        row.createCell(21, CellType.STRING).setCellValue("NT - FR4-IMGT");
+
+        row.createCell(22, CellType.STRING).setCellValue("NT - Merged");
+    }
+
+    private String getCellStringValue(final Cell cell) {
+        return getCellValueOrDefault(cell, "");
+    }
+
 }
