@@ -2,6 +2,7 @@ package com.ajay.bio.tool.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -49,9 +50,8 @@ public class ImageProcessorTool implements BaseTool {
     }
 
     private void executeTool(final Path inputDirPath, final Path outputDirPath) throws IOException, ToolExecutionException {
-
-        final List<String> outputCsvLines = new ArrayList<>();
         final File outputCsvFile = new File(outputDirPath.toFile(), "Summary.csv");
+        final List<String> outputCsvLines = readPreviousContent(outputCsvFile);
 
         try {
             for (final File inputFile : FileUtils.listFiles(inputDirPath.toFile(), TrueFileFilter.INSTANCE, null)) {
@@ -79,6 +79,13 @@ public class ImageProcessorTool implements BaseTool {
         }
     }
 
+    private List<String> readPreviousContent(final File outputCsvFile) throws IOException {
+        if (Files.exists(outputCsvFile.toPath())) {
+            return FileUtils.readLines(outputCsvFile, StandardCharsets.UTF_8);
+        }
+
+        return new ArrayList<>();
+    }
 
     private boolean isOutputPresent(final Path inputFile, final Path outputDirPath) {
         final File output = new File(outputDirPath.toFile(), inputFile.toFile().getName() + "-processed.png");
