@@ -22,8 +22,8 @@ public class ImageProcessingStrategyTwo extends BaseStrategy {
     private static double backgroundLimit = 0;
 
     // we consider points with G > fLimit and boundary point G < bLimit
-    private static int[] fLimit = {120, 100, 60, 50, 45, 40, 30, 25};
-    private static int[] bLimit = {100, 70, 40, 38, 35, 30, 25, 18};
+    private static int[] fLimit = {120, 100, 60, 50, 50, 45, 40, 30, 25};
+    private static int[] bLimit = {100, 70, 40, 45, 38, 35, 30, 25, 18};
 
     public static int processTifFile(final Path inputFile, final Path outputDirPath) throws Exception {
         final File input = inputFile.toFile();

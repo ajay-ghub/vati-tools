@@ -53,28 +53,30 @@ public class ImageProcessorTool implements BaseTool {
         final List<String> outputCsvLines = new ArrayList<>();
         final File outputCsvFile = new File(outputDirPath.toFile(), "Summary.csv");
 
-        for (final File inputFile : FileUtils.listFiles(inputDirPath.toFile(), TrueFileFilter.INSTANCE, null)) {
-            final String inputFileName = inputFile.getName();
-            if (inputFileName.endsWith(".tif") || inputFileName.endsWith(".TIF") || inputFileName.endsWith(".tiff")
-                        || inputFileName.endsWith(".TIFF")) {
+        try {
+            for (final File inputFile : FileUtils.listFiles(inputDirPath.toFile(), TrueFileFilter.INSTANCE, null)) {
+                final String inputFileName = inputFile.getName();
+                if (inputFileName.endsWith(".tif") || inputFileName.endsWith(".TIF") || inputFileName.endsWith(".tiff")
+                            || inputFileName.endsWith(".TIFF")) {
 
-                if (isOutputPresent(inputFile.toPath(), outputDirPath)) {
-                    log.info("File already processed, ignoring - {}", inputFileName);
-                } else {
-                    log.info("Processing file - {}", inputFileName);
-                    try {
-                        int count = ImageProcessingStrategyTwo.processTifFile(inputFile.toPath(), outputDirPath);
-                        outputCsvLines.add(String.format("%s,%d", inputFileName, count));
-                        log.info("Successfully processed file - {}, count - {}", inputFileName, count);
-                    } catch (Exception e) {
-                        log.error("Failed to process file - {}", inputFileName);
-                        throw new ToolExecutionException("Failed to process file", e);
+                    if (isOutputPresent(inputFile.toPath(), outputDirPath)) {
+                        log.info("File already processed, ignoring - {}", inputFileName);
+                    } else {
+                        log.info("Processing file - {}", inputFileName);
+                        try {
+                            int count = ImageProcessingStrategyTwo.processTifFile(inputFile.toPath(), outputDirPath);
+                            outputCsvLines.add(String.format("%s,%d", inputFileName, count));
+                            log.info("Successfully processed file - {}, count - {}", inputFileName, count);
+                        } catch (Exception e) {
+                            log.error("Failed to process file - {}", inputFileName);
+                            throw new ToolExecutionException("Failed to process file", e);
+                        }
                     }
                 }
             }
+        } finally {
+            FileUtils.writeLines(outputCsvFile, outputCsvLines);
         }
-
-        FileUtils.writeLines(outputCsvFile, outputCsvLines);
     }
 
 
