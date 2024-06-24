@@ -17,11 +17,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "IG_CATEGORISATION", mixinStandardHelpOptions = true, version = "14-Aug-2022",
@@ -49,6 +45,8 @@ public class IGCategorisationTool implements BaseTool {
     private static final String COMBINED_IG_FILE_IGK_SHEET_NAME = "IGK";
     private static final String COMBINED_IG_FILE_IGL_SHEET_NAME = "IGL";
     private static final String COMBINED_IG_FILE_UNKNOWN_SHEET_NAME = "Unknown";
+
+    private static final String FASTA_COL_FORMAT = ">%s" + System.lineSeparator() + "%s";
 
     private static final String IGH_DIR_NAME = "IGH";
     private static final String IGK_DIR_NAME = "IGK";
@@ -91,26 +89,25 @@ public class IGCategorisationTool implements BaseTool {
                 if (inputFile.getName().endsWith(".xls")) {
 
                     log.info("Processing Excel File - {}", inputFile.getName());
-                    try {
-                        final Workbook workbook = openExcelWorkbook(inputFile.toPath());
-                        final Sheet aaSequenceSheet = workbook.getSheet("AA-sequences");
+                    try (final Workbook imgtWorkbook = openExcelWorkbook(inputFile.toPath())) {
+                        final Sheet aaSequenceSheet = imgtWorkbook.getSheet("AA-sequences");
                         final String vGene = getCellValueOrDefault(aaSequenceSheet.getRow(1).getCell(3),
-                                                                   "EmptyVGene");
+                                "EmptyVGene");
 
                         log.debug("Found VGene - {} for sequence - {}", vGene, inputFile.getName());
                         if (vGene.contains("IGH")) {
-                            updateSheetWithInfo(ighSheet, aaSequenceSheet, workbook.getSheet("Nt-sequences"),
-                                                workbook.getSheet("Summary"));
+                            updateSheetWithInfo(ighSheet, aaSequenceSheet, imgtWorkbook.getSheet("Nt-sequences"),
+                                    imgtWorkbook.getSheet("Summary"));
                         } else if (vGene.contains("IGK")) {
-                            updateSheetWithInfo(igkSheet, aaSequenceSheet, workbook.getSheet("Nt-sequences"),
-                                                workbook.getSheet("Summary"));
+                            updateSheetWithInfo(igkSheet, aaSequenceSheet, imgtWorkbook.getSheet("Nt-sequences"),
+                                    imgtWorkbook.getSheet("Summary"));
                         } else if (vGene.contains("IGL")) {
-                            updateSheetWithInfo(iglSheet, aaSequenceSheet, workbook.getSheet("Nt-sequences"),
-                                                workbook.getSheet("Summary"));
+                            updateSheetWithInfo(iglSheet, aaSequenceSheet, imgtWorkbook.getSheet("Nt-sequences"),
+                                    imgtWorkbook.getSheet("Summary"));
                         } else {
                             log.error("Invalid VGene found for sequence - {}, vGene - {}", inputFile.getName(), vGene);
-                            updateSheetWithInfo(unknownSheet, aaSequenceSheet, workbook.getSheet("Nt-sequences"),
-                                                workbook.getSheet("Summary"));
+                            updateSheetWithInfo(unknownSheet, aaSequenceSheet, imgtWorkbook.getSheet("Nt-sequences"),
+                                    imgtWorkbook.getSheet("Summary"));
                         }
                     } catch (IOException e) {
                         log.debug("IO Exception while processing file", e);
@@ -202,10 +199,10 @@ public class IGCategorisationTool implements BaseTool {
                     r.cellIterator().forEachRemaining(cell -> {
                         if (cell.getCellType() == CellType.NUMERIC) {
                             newRow.createCell(cell.getColumnIndex(),
-                                              cell.getCellType()).setCellValue(cell.getNumericCellValue());
+                                    cell.getCellType()).setCellValue(cell.getNumericCellValue());
                         } else {
                             newRow.createCell(cell.getColumnIndex(),
-                                              cell.getCellType()).setCellValue(getCellStringValue(cell));
+                                    cell.getCellType()).setCellValue(getCellStringValue(cell));
                         }
                     });
 
@@ -257,6 +254,8 @@ public class IGCategorisationTool implements BaseTool {
         row.createCell(21, CellType.STRING).setCellValue("NT - FR4-IMGT");
 
         row.createCell(22, CellType.STRING).setCellValue("NT - Merged");
+        row.createCell(23, CellType.STRING).setCellValue("NT - Merged - Fasta");
+        row.createCell(24, CellType.STRING).setCellValue("AA - Merged - Fasta");
     }
 
     private void updateSheetWithInfo(final Sheet sheetToUpdate, final Sheet aaSequenceSheet,
@@ -271,7 +270,8 @@ public class IGCategorisationTool implements BaseTool {
 
         newRow.createCell(0, CellType.NUMERIC).setCellValue(newRowNum);
         // sequence ID
-        newRow.createCell(1, CellType.STRING).setCellValue(getCellStringValue(summarySheetRow.getCell(1)));
+        final String sequenceId = getCellStringValue(summarySheetRow.getCell(1));
+        newRow.createCell(1, CellType.STRING).setCellValue(sequenceId);
         // V-Domain Functionality
         newRow.createCell(2, CellType.STRING).setCellValue(getCellStringValue(summarySheetRow.getCell(2)));
         // JUNCTION frame
@@ -333,6 +333,16 @@ public class IGCategorisationTool implements BaseTool {
         // manually merge above NT columns
         final String ntMerged = ntFr1 + ntCdr1 + ntFr2 + ntCdr2 + ntFr3 + ntCdr3 + ntFr4;
         newRow.createCell(22, CellType.STRING).setCellValue(ntMerged);
+        // Merged NT value in FASTA format
+        newRow.createCell(23, CellType.STRING).setCellValue(String.format(FASTA_COL_FORMAT, sequenceId, ntMerged));
+        // Merged AA value in FASTA format
+        newRow.createCell(24, CellType.STRING).setCellValue(String.format(FASTA_COL_FORMAT, sequenceId, aaMerged));
+    }
+
+    private void enableTextWrapping(Cell cell, Workbook workbook) {
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setWrapText(true);
+        cell.setCellStyle(cellStyle);
     }
 
     private String getCellStringValue(final Cell cell) {

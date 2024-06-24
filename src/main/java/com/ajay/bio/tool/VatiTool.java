@@ -3,11 +3,7 @@ package com.ajay.bio.tool;
 import java.io.PrintWriter;
 import java.util.concurrent.Callable;
 
-import com.ajay.bio.tool.impl.ClustalAlignmentTool;
-import com.ajay.bio.tool.impl.FileConverterTool;
-import com.ajay.bio.tool.impl.IGCategorisationTool;
-import com.ajay.bio.tool.impl.IMGTAnalysisTool;
-import com.ajay.bio.tool.impl.ImageProcessorTool;
+import com.ajay.bio.tool.impl.*;
 import org.jline.reader.LineReader;
 import picocli.CommandLine;
 
@@ -23,7 +19,8 @@ import picocli.CommandLine;
                 ImageProcessorTool.class,
                 IMGTAnalysisTool.class,
                 IGCategorisationTool.class,
-                ClustalAlignmentTool.class
+                ClustalAlignmentTool.class,
+                IGPostProcessing.class
         })
 public class VatiTool {
     public static void main(String[] args) {

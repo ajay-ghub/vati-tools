@@ -1,5 +1,6 @@
 package com.ajay.bio.util;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -37,5 +38,18 @@ public final class ValidationUtil {
                                                          "Specified file path is a directory - " + filePath);
             }
         }
+    }
+
+    public static void validateFile(final CommandLine.Model.CommandSpec spec, final File file) {
+            if (file == null || Files.notExists(file.toPath())) {
+                throw new CommandLine.ParameterException(spec.commandLine(),
+                        "Specified file does not exist - " + file);
+            }
+
+            if (Files.isDirectory(file.toPath())) {
+                throw new CommandLine.ParameterException(spec.commandLine(),
+                        "Specified file path is a directory - " + file);
+            }
+
     }
 }
