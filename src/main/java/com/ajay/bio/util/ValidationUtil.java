@@ -52,4 +52,17 @@ public final class ValidationUtil {
             }
 
     }
+
+    public static void validateRange(final CommandLine.Model.CommandSpec spec, final int value,
+                                     final int startRangeInclusive, final int endRangeInclusive) {
+        if (value < startRangeInclusive || value > endRangeInclusive) {
+            throw new CommandLine.ParameterException(
+                    spec.commandLine(),
+                    String.format(
+                            "Invalid value - %s, value should be in range [%s, %s]",
+                            value, startRangeInclusive, endRangeInclusive
+                    )
+            );
+        }
+    }
 }

@@ -20,7 +20,8 @@ import picocli.CommandLine;
                 IMGTAnalysisTool.class,
                 IGCategorisationTool.class,
                 ClustalAlignmentTool.class,
-                IGPostProcessing.class
+                IGPostProcessing.class,
+                ColonotypeTool.class
         })
 public class VatiTool {
     public static void main(String[] args) {
