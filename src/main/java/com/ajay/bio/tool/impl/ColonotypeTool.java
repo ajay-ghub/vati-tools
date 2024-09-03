@@ -85,18 +85,20 @@ public class ColonotypeTool implements BaseTool {
             if (row == null) {
                 continue;
             }
-            
+
             if (!(vColNum < row.getLastCellNum() && jColNum < row.getLastCellNum() && cdr3ColNum < row.getLastCellNum())) {
                 log.warn("Invalid row, sheet - {}, row number - {}", sheet.getSheetName(), i + 1);
                 continue;
             }
 
-            final Cell vCell = sheet.getRow(i).getCell(vColNum);
-            final Cell jCell = sheet.getRow(i).getCell(jColNum);
-            final Cell cdr3Cell = sheet.getRow(i).getCell(cdr3ColNum);
+            final Cell vCell = sheet.getRow(i).getCell(vColNum - 1);
+            final Cell jCell = sheet.getRow(i).getCell(jColNum - 1);
+            final Cell cdr3Cell = sheet.getRow(i).getCell(cdr3ColNum - 1);
 
             // main logic by fuzu
-            final String key = getStringValue(vCell) + ":" + getStringValue(jCell) + ":" + getStringValue(cdr3Cell).length();
+            final String vCellValue = normalizeCellValue(getStringValue(vCell));
+            final String jCellValue = normalizeCellValue(getStringValue(jCell));
+            final String key = vCellValue + ":" + jCellValue + ":" + getStringValue(cdr3Cell).length();
 
             if (rowMap.containsKey(key)) {
                 rowMap.get(key).add(row);
@@ -118,6 +120,22 @@ public class ColonotypeTool implements BaseTool {
 
             groupNum++;
         }
+    }
+
+    private String normalizeCellValue(String stringValue) {
+        if (stringValue.isEmpty()) {
+            return stringValue;
+        }
+
+        if (stringValue.contains(",")) {
+            return stringValue.split(",")[0].trim();
+        }
+
+        if (stringValue.contains("(see ")) {
+            return stringValue.split("\\(")[0].trim();
+        }
+
+        return stringValue;
     }
 
     private String getStringValue(Cell cell) {
